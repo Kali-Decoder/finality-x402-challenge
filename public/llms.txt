@@ -1,0 +1,17 @@
+# Finality Market Intelligence
+
+> Agent- and user-accessible market, AI, and Algorand on-chain intelligence — paid per result with Testnet USDC via x402.
+
+## Platform
+- Website: https://finality.accuracy.wtf
+- API: https://finality-x402-backend.onrender.com
+- Merchant ID: WVo0V1JSUEYzMklQNFdHSDVLUk9ERjJL
+- PayTo: YZ4WRRPF32IP4WGH5KRODF2KW5ZUKC7FH5DUICP2IXP2CFNFSRV7SDZF24
+- Facilitator: https://facilitator.goplausible.xyz
+- Network: Algorand Testnet · Asset: USDC (10458941)
+- Tags: finality, x402, algorand, x402-global-challenge (x402-Global challenge)
+
+## Docs
+- [Catalog](https://finality-x402-backend.onrender.com/v1/catalog)
+- [OpenAPI](https://finality-x402-backend.onrender.com/v1/openapi.json)
+- [Explore UI](https://finality.accuracy.wtf/explore)

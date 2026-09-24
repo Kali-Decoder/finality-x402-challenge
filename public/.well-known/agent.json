@@ -1,0 +1,20 @@
+{
+  "name": "Finality Market Intelligence",
+  "description": "Agent- and user-accessible market, AI, and Algorand on-chain intelligence — paid per result with Mainnet USDC via x402.",
+  "url": "https://finality-x402-backend.onrender.com",
+  "website": "https://finality.accuracy.wtf",
+  "logo": "https://finality.accuracy.wtf/logo.webp",
+  "image": "https://finality.accuracy.wtf/og.png",
+  "documentation": "https://finality-x402-backend.onrender.com/llms.txt",
+  "tags": ["finality", "x402", "algorand", "x402-global-challenge"],
+  "categories": ["market-intelligence", "agents", "algorand", "x402", "x402-global-challenge"],
+  "payments": {
+    "protocol": "x402",
+    "network": "algorand-mainnet",
+    "asset": "USDC",
+    "asaId": 31566704,
+    "facilitator": "https://facilitator.goplausible.xyz",
+    "merchantId": "WVo0V1JSUEYzMklQNFdHSDVLUk9ERjJL",
+    "payTo": "UEET5PA753P26B6LVUSXUKUYDVM33YLE6ETZWPLJDHJXQDKNYOUZPFKCSU"
+  }
+}
