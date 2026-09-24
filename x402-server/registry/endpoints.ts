@@ -1,0 +1,47 @@
+export type OperationId = typeof endpoints[number]['operationId']
+export type Endpoint = typeof endpoints[number]
+
+/** Testnet USDC prices ($0.10–$0.90). Light routes low; heavy/LLM routes high. */
+export const endpoints = [
+  ['market.quotes','GET','/v1/market/quotes','$0.15','Bounded crypto spot quotes','durable'],
+  ['market.assets','GET','/v1/market/assets','$0.15','Asset search and symbol normalization','durable'],
+  ['market.candles','POST','/v1/market/candles','$0.25','Bounded OHLCV history','durable'],
+  ['market.trending','GET','/v1/market/trending','$0.20','Ranked crypto assets','durable'],
+  ['market.categories','GET','/v1/market/categories','$0.15','Coin categories by 24h market-cap change','durable'],
+  ['market.tokenPrices','GET','/v1/market/token-prices','$0.20','ERC-20 / on-chain token USD prices','durable'],
+  ['market.fearGreed','GET','/v1/market/fear-greed','$0.10','Crypto Fear and Greed index','durable'],
+  ['intelligence.signals','POST','/v1/signals','$0.45','Multi-market signals and summary','durable'],
+  ['intelligence.technicals','POST','/v1/technicals','$0.45','Technical indicators and regime','durable'],
+  ['intelligence.report','POST','/v1/analysis/report','$0.70','Combined intelligence report','durable'],
+  ['intelligence.volume','POST','/v1/analysis/volume','$0.25','Volume participation analysis','durable'],
+  ['intelligence.events','POST','/v1/analysis/events','$0.45','Market event intelligence','durable'],
+  ['intelligence.backtest','POST','/v1/backtest','$0.70','Bounded strategy backtest','durable'],
+  ['agent.decision','POST','/v1/agent/decision','$0.55','Deterministic risk-aware decision','durable'],
+  ['agent.briefing','POST','/v1/agent/briefing','$0.70','Machine-readable market briefing','durable'],
+  ['agent.strategyParse','POST','/v1/agent/strategy/parse','$0.55','Natural language strategy parser','durable'],
+  ['ai.chat','POST','/v1/ai/chat','$0.90','Data-grounded analyst response','quota-limited'],
+  ['onchain.algorandAccount','POST','/v1/onchain/algorand/account','$0.25','Algorand account intelligence','durable'],
+  ['onchain.algorandPortfolio','POST','/v1/onchain/algorand/portfolio','$0.35','Algorand ASA portfolio','durable'],
+  ['onchain.algorandAsset','POST','/v1/onchain/algorand/asset','$0.20','Algorand asset intelligence','durable'],
+  ['onchain.algorandDefi','POST','/v1/onchain/algorand/defi','$0.45','Indexer-backed Algorand DeFi activity','durable'],
+  ['onchain.algodStatus','GET','/v1/onchain/algod/status','$0.10','Nodely algod node status and last round','durable'],
+  ['onchain.algodSupply','GET','/v1/onchain/algod/supply','$0.10','Current ledger ALGO supply','durable'],
+  ['onchain.algodParams','GET','/v1/onchain/algod/params','$0.10','Suggested transaction parameters','durable'],
+  ['onchain.algodAccount','GET','/v1/onchain/algod/account','$0.20','Live algod account information','durable'],
+  ['onchain.algodAccountAssets','GET','/v1/onchain/algod/account/assets','$0.25','Paginated account ASA holdings','durable'],
+  ['onchain.algodAccountAsset','GET','/v1/onchain/algod/account/asset','$0.20','Account holding for one ASA','durable'],
+  ['onchain.algodAccountApps','GET','/v1/onchain/algod/account/applications','$0.25','Paginated account application local state','durable'],
+  ['onchain.algodAccountApp','GET','/v1/onchain/algod/account/application','$0.20','Account local state for one application','durable'],
+  ['onchain.algodPendingByAddress','GET','/v1/onchain/algod/account/pending','$0.25','Unconfirmed mempool transactions by address','durable'],
+  ['onchain.algodAsset','GET','/v1/onchain/algod/asset','$0.20','Live algod asset parameters','durable'],
+  ['onchain.algodApplication','GET','/v1/onchain/algod/application','$0.25','Application programs and global state','durable'],
+  ['onchain.algodApplicationBoxes','GET','/v1/onchain/algod/application/boxes','$0.35','Application box names','durable'],
+  ['onchain.algodApplicationBox','GET','/v1/onchain/algod/application/box','$0.20','Single application box value','durable'],
+  ['onchain.algodBlock','GET','/v1/onchain/algod/block','$0.35','Block header for a round','durable'],
+  ['onchain.algodBlockHash','GET','/v1/onchain/algod/block/hash','$0.10','Block hash for a round','durable'],
+  ['onchain.algodBlockTxids','GET','/v1/onchain/algod/block/txids','$0.15','Top-level transaction IDs in a block','durable'],
+  ['onchain.algodBlockLogs','GET','/v1/onchain/algod/block/logs','$0.35','App-call logs for a round','durable'],
+  ['onchain.algodPending','GET','/v1/onchain/algod/pending','$0.15','Global unconfirmed transaction pool','durable'],
+].map(([operationId,method,path,price,description,availabilityTrack]) => ({ operationId, method, path, price, description, availabilityTrack, version: '1.0.0', limits: { symbols: 10, candles: 500, bodyBytes: 32_768 } })) as Array<{operationId: string; method: 'GET'|'POST'; path: string; price: string; description: string; availabilityTrack: 'durable'|'quota-limited'; version: string; limits: {symbols:number;candles:number;bodyBytes:number}}>
+
+export const byOperationId = new Map(endpoints.map(endpoint => [endpoint.operationId, endpoint]))
