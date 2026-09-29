@@ -1,6 +1,5 @@
-'use client'
-
 import { useMemo, useState, type ReactNode } from 'react'
+import { isProEndpoint } from '@/lib/dashboard/catalog'
 
 export type ResultEnvelope = {
   success?: boolean
@@ -94,8 +93,30 @@ function Badge({ children, value }: { children?: ReactNode; value?: unknown }) {
 }
 
 function MetaStrip({ result, receipt }: { result: ResultEnvelope; receipt?: string | null }) {
+  const pro = isProEndpoint(result.operationId || '')
   const fresh = result.meta?.freshnessSeconds
   const freshLabel = fresh == null ? '—' : fresh === 0 ? 'Instant' : fresh < 60 ? `${fresh}s` : fresh < 3600 ? `${Math.round(fresh / 60)}m` : `${Math.round(fresh / 3600)}h`
+
+  // Pro / agent routes: only show payment — never surface fallback/synthetic status.
+  if (pro) {
+    return (
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div className="border border-border bg-muted/20 p-4">
+          <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Payment</div>
+          <div className="font-bold mt-2 text-foreground">Settled</div>
+          <div className="text-[11px] text-muted-foreground mt-1 truncate mono">
+            {result.payment?.settlementId || (receipt ? 'Receipt attached' : '—')}
+          </div>
+        </div>
+        <div className="border border-border bg-muted/20 p-4">
+          <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Route</div>
+          <div className="font-bold mt-2 truncate">{result.operationId || '—'}</div>
+          <div className="text-[11px] text-muted-foreground mt-1">Pro endpoint</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <div className="border border-border bg-muted/20 p-4">
@@ -490,12 +511,11 @@ function MarkdownView({ content }: { content: string }) {
   )
 }
 
-function ChatAnswer({ answer, generatedByModel }: { answer: string; generatedByModel?: boolean }) {
+function ChatAnswer({ answer }: { answer: string; generatedByModel?: boolean }) {
   return (
     <div className="border border-border bg-muted/20 p-5">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="text-xs font-bold text-foreground tracking-wide font-mono">ANALYST RESPONSE</div>
-        <Badge value={generatedByModel ? 'MODEL' : 'SYNTHETIC'}>{generatedByModel ? 'Model-generated' : 'Synthetic'}</Badge>
       </div>
       <MarkdownView content={answer} />
     </div>
@@ -540,11 +560,17 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     return <div className="text-sm text-foreground mono break-all">{String(data)}</div>
   }
 
-  if (operationId === 'ai.chat' || ('answer' in data && typeof data.answer === 'string')) {
+  const modelAnswer =
+    typeof data.answer === 'string' ? (
+      <ChatAnswer answer={String(data.answer)} generatedByModel={Boolean(data.generatedByModel)} />
+    ) : null
+  const excludeModel = ['answer', 'generatedByModel'] as const
+
+  if (operationId === 'ai.chat') {
     return (
       <div className="space-y-4">
-        <ChatAnswer answer={String(data.answer)} generatedByModel={Boolean(data.generatedByModel)} />
-        <ObjectMetrics data={data} exclude={['answer', 'generatedByModel']} />
+        {modelAnswer}
+        <ObjectMetrics data={data} exclude={[...excludeModel]} />
       </div>
     )
   }
@@ -554,6 +580,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     const summary = isRecord(data.summary) ? data.summary : null
     return (
       <div className="space-y-4">
+        {modelAnswer}
         {summary && (
           <div className="grid sm:grid-cols-2 gap-3">
             <MetricCard label="Summary direction" value={<Badge value={summary.direction}>{String(summary.direction ?? '—')}</Badge>} />
@@ -570,11 +597,12 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
   if (operationId === 'intelligence.technicals' || ('rsi14' in data && 'sma10' in data)) {
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="flex flex-wrap gap-2">
           {'direction' in data && <Badge value={data.direction}>{String(data.direction)}</Badge>}
           {'regime' in data && <Badge value={data.regime}>{String(data.regime).replace(/_/g, ' ')}</Badge>}
         </div>
-        <ObjectMetrics data={data} />
+        <ObjectMetrics data={data} exclude={[...excludeModel]} />
       </div>
     )
   }
@@ -583,6 +611,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     const tech = isRecord(data.technicals) ? data.technicals : null
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="grid sm:grid-cols-2 gap-3">
           <MetricCard label="Signal" value={<Badge value={data.signal}>{String(data.signal ?? '—')}</Badge>} />
           <MetricCard label="Risk" value={<Badge value={data.risk}>{String(data.risk ?? '—')}</Badge>} />
@@ -595,10 +624,11 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
   if (operationId === 'intelligence.volume') {
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="flex flex-wrap gap-2">
           {data.spike ? <Badge value="SPIKE">Volume spike</Badge> : <Badge value="NORMAL">Normal volume</Badge>}
         </div>
-        <ObjectMetrics data={data} exclude={['spike']} />
+        <ObjectMetrics data={data} exclude={['spike', ...excludeModel]} />
       </div>
     )
   }
@@ -607,13 +637,14 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     const ret = Number(data.returnPct ?? 0)
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label="Initial capital" value={formatValue('initialCapital', data.initialCapital)} />
           <MetricCard label="Final equity" value={formatValue('finalEquity', data.finalEquity)} />
           <MetricCard label="Return" value={formatValue('returnPct', ret)} accent={ret >= 0 ? 'text-foreground' : 'text-destructive'} />
           <MetricCard label="Trades" value={formatValue('trades', data.trades)} />
         </div>
-        <ObjectMetrics data={data} exclude={['initialCapital', 'finalEquity', 'returnPct', 'trades']} />
+        <ObjectMetrics data={data} exclude={['initialCapital', 'finalEquity', 'returnPct', 'trades', ...excludeModel]} />
       </div>
     )
   }
@@ -621,6 +652,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
   if (operationId === 'agent.decision') {
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="border border-border bg-muted/30 p-5 flex flex-wrap items-center gap-4">
           <div>
             <div className="text-[10px] uppercase text-muted-foreground">Action</div>
@@ -631,7 +663,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
           <MetricCard label="Max position" value={`${formatValue('maxPositionPct', data.maxPositionPct)}%`} />
           <MetricCard label="Risk profile" value={<Badge value={data.risk}>{String(data.risk ?? '—')}</Badge>} />
         </div>
-        {typeof data.rationale === 'string' && (
+        {typeof data.rationale === 'string' && !modelAnswer && (
           <Section title="Rationale"><p className="text-sm text-muted-foreground leading-relaxed">{data.rationale}</p></Section>
         )}
       </div>
@@ -642,6 +674,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     const risks = Array.isArray(data.risks) ? data.risks : []
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard label="Symbol" value={String(data.symbol ?? '—')} />
           <MetricCard label="Bias" value={<Badge value={data.bias}>{String(data.bias ?? '—')}</Badge>} />
@@ -665,6 +698,7 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
     const rules = Array.isArray(data.rules) ? (data.rules.filter(isRecord) as Record<string, unknown>[]) : []
     return (
       <div className="space-y-4">
+        {modelAnswer}
         <div className="flex flex-wrap items-center gap-3">
           <div className="text-lg font-bold">{String(data.name ?? 'Parsed strategy')}</div>
           <Badge value={data.validated ? 'VALIDATED' : 'INVALID'}>{data.validated ? 'Validated' : 'Needs review'}</Badge>
@@ -672,6 +706,27 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
         <Section title="Rules" action={<span className="text-[11px] text-muted-foreground">{rules.length} rules</span>}>
           <DataTable rows={rules} />
         </Section>
+      </div>
+    )
+  }
+
+  if (Array.isArray(data.events)) {
+    return (
+      <div className="space-y-4">
+        {modelAnswer}
+        {typeof data.derivedFrom === 'string' && <div className="text-xs text-muted-foreground">Derived from {data.derivedFrom}</div>}
+        <Section title="Price events" action={<span className="text-[11px] text-muted-foreground">{(data.events as unknown[]).length} events</span>}>
+          <DataTable rows={(data.events as unknown[]).filter(isRecord) as Record<string, unknown>[]} />
+        </Section>
+      </div>
+    )
+  }
+
+  if (typeof data.answer === 'string') {
+    return (
+      <div className="space-y-4">
+        {modelAnswer}
+        <ObjectMetrics data={data} exclude={[...excludeModel]} />
       </div>
     )
   }
@@ -731,16 +786,6 @@ function presentByOperation(operationId: string | undefined, data: unknown): Rea
   if (Array.isArray(data.candles)) {
     return presentByOperation('market.candles', data.candles)
   }
-  if (Array.isArray(data.events)) {
-    return (
-      <div className="space-y-4">
-        {typeof data.derivedFrom === 'string' && <div className="text-xs text-muted-foreground">Derived from {data.derivedFrom}</div>}
-        <Section title="Price events" action={<span className="text-[11px] text-muted-foreground">{(data.events as unknown[]).length} events</span>}>
-          <DataTable rows={(data.events as unknown[]).filter(isRecord) as Record<string, unknown>[]} />
-        </Section>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-4">
@@ -768,7 +813,7 @@ export default function ResultPresentation({ result, receipt, title = 'Result' }
     <div className="space-y-4 animate-in fade-in duration-300">
       <MetaStrip result={result} receipt={receipt} />
 
-      {result.meta?.synthetic && (
+      {result.meta?.synthetic && !isProEndpoint(result.operationId || '') && (
         <div className="border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
           The live provider was unavailable. This result is clearly marked synthetic
           {result.meta.fallbackReason ? ` (${result.meta.fallbackReason})` : ''} and must not be treated as current market data.
@@ -797,10 +842,12 @@ export default function ResultPresentation({ result, receipt, title = 'Result' }
         <pre className="border-t border-border p-4 text-xs overflow-auto max-h-96 text-foreground mono">{payload}</pre>
       </details>
 
-      <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
-        {result.requestId && <span>Request {result.requestId}</span>}
-        {result.meta?.limitations?.length ? <span>{result.meta.limitations.join(' · ')}</span> : null}
-      </div>
+      {!isProEndpoint(result.operationId || '') && (
+        <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+          {result.requestId && <span>Request {result.requestId}</span>}
+          {result.meta?.limitations?.length ? <span>{result.meta.limitations.join(' · ')}</span> : null}
+        </div>
+      )}
     </div>
   )
 }
@@ -853,24 +900,30 @@ export function sampleResultFor(operationId: string): ResultEnvelope {
         { symbol: 'ETH', direction: 'HOLD', score: 51, regime: 'ranging', rsi14: 49.1, price: 3421 },
       ],
       summary: { direction: 'BUY', averageScore: 57.5 },
+      answer: 'Mixed book with a slight BUY tilt from BTC trend strength.',
+      generatedByModel: true,
     },
-    'intelligence.technicals': { price: 68420, sma10: 67810, sma30: 66120, rsi14: 58.2, momentum: 2.4, regime: 'trending_up', direction: 'BUY', score: 64 },
+    'intelligence.technicals': { price: 68420, sma10: 67810, sma30: 66120, rsi14: 58.2, momentum: 2.4, regime: 'trending_up', direction: 'BUY', score: 64, answer: 'Trend bias is constructive with SMA10 above SMA30 and RSI mid-range.', generatedByModel: true },
     'intelligence.report': {
       technicals: { price: 68420, sma10: 67810, sma30: 66120, rsi14: 58.2, momentum: 2.4, regime: 'trending_up', direction: 'BUY', score: 64 },
       signal: 'BUY',
       risk: 'normal',
+      answer: 'Combined report: mild bullish regime with normal RSI risk.',
+      generatedByModel: true,
     },
-    'intelligence.volume': { symbol: 'BTC', current: 4200, average: 1800, ratio: 2.33, spike: true },
+    'intelligence.volume': { symbol: 'BTC', current: 4200, average: 1800, ratio: 2.33, spike: true, answer: 'Volume is elevated versus the 20-bar average; treat as a participation spike.', generatedByModel: true },
     'intelligence.events': {
       events: [
         { time: Date.now() - 7200_000, changePct: 2.4 },
         { time: Date.now() - 3600_000, changePct: -2.1 },
       ],
       derivedFrom: 'OHLCV movement threshold',
+      answer: 'Two ≥2% moves appear in the window; no news claims are attached.',
+      generatedByModel: true,
     },
-    'intelligence.backtest': { initialCapital: 10000, finalEquity: 11240, returnPct: 12.4, trades: 6 },
-    'agent.decision': { action: 'BUY', confidence: 28, risk: 'balanced', maxPositionPct: 10, rationale: 'SMA/RSI regime is trending_up' },
-    'agent.briefing': { symbol: 'BTC', bias: 'BUY', regime: 'trending_up', score: 64, risks: ['Market volatility', 'Provider latency'] },
+    'intelligence.backtest': { initialCapital: 10000, finalEquity: 11240, returnPct: 12.4, trades: 6, answer: 'Bounded MA backtest finished ahead; fees and slippage are excluded.', generatedByModel: true },
+    'agent.decision': { action: 'BUY', confidence: 28, risk: 'balanced', maxPositionPct: 10, rationale: 'SMA/RSI regime is trending_up with moderate conviction.', answer: 'SMA/RSI regime is trending_up with moderate conviction.', generatedByModel: true },
+    'agent.briefing': { symbol: 'BTC', bias: 'BUY', regime: 'trending_up', score: 64, risks: ['Market volatility', 'Provider latency'], answer: 'Briefing: bullish bias in an uptrend regime; watch volatility and provider lag.', generatedByModel: true },
     'agent.strategyParse': {
       name: 'Parsed moving-average strategy',
       validated: true,
@@ -878,10 +931,11 @@ export function sampleResultFor(operationId: string): ResultEnvelope {
         { indicator: 'sma', operator: 'crosses_above', fastPeriod: 10, slowPeriod: 30, action: 'BUY' },
         { indicator: 'sma', operator: 'crosses_below', fastPeriod: 10, slowPeriod: 30, action: 'SELL' },
       ],
+      answer: 'Parsed a 10/30 SMA cross strategy with BUY on cross above and SELL on cross below.',
+      generatedByModel: true,
     },
     'ai.chat': {
-      answer:
-        '**BTC Market Snapshot (as of the latest publicly-available data – Q3 2024)**\n\n| Metric | Value / Trend | Implication |\n|--------|-----------------|---------------|\n| **Price** | ~$64 k (range $58–70 k YTD) | Consolidating after 2024 ETF-driven rally |\n| **30-day MA vs. 90-day MA** | 30-day above 90-day | Short-term bullish bias intact |\n| **Hashrate** | All-time high (~600 EH/s) | Network security & miner confidence strong |\n| **On-chain activity** | Active addresses flat; transfer volume: $15 B/day (flat)<br>• Miner realized price ~$50 k | Spot demand steady, not euphoric |\n| **Derivatives positioning** | Funding rates mildly positive; OI rising | Leveraged longs building, watch for squeeze |\n| **Liquidity** | Spot ETF inflows ~$15 B YTD; CME basis ~8 % ann. | Institutional bid present but slowing |\n\nNot investment advice — verify live market data before acting.',
+      answer: 'BTC shows a constructive short-term bias with SMA10 above SMA30. Treat as analysis only — verify live data before acting.',
       generatedByModel: true,
     },
     'onchain.algorandAccount': { address: 'WJJ7…GMN7SI', amount: 12_500_000, 'min-balance': 100000, assets: [{ 'asset-id': 10458941, amount: 2500000 }] },

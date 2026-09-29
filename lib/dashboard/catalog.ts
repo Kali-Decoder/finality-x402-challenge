@@ -30,7 +30,7 @@ export const ENDPOINT_DETAILS: Record<string, EndpointMeta> = {
   'agent.decision': { title: 'Agent Decision', category: 'Agent tools', use: 'Bounded action, confidence and position limit' },
   'agent.briefing': { title: 'Agent Briefing', category: 'Agent tools', use: 'Compact machine-readable market context' },
   'agent.strategyParse': { title: 'Strategy Parser', category: 'Agent tools', use: 'Turn plain language into validated rules' },
-  'ai.chat': { title: 'AI Market Analyst', category: 'AI analyst', use: 'Ask a concise Groq-powered market question' },
+  'ai.chat': { title: 'AI Market Analyst', category: 'AI analyst', use: 'Ask a concise Gemini-powered market question' },
   'onchain.algorandAccount': { title: 'Algorand Account', category: 'Algorand', use: 'Inspect a Mainnet account from the Indexer' },
   'onchain.algorandPortfolio': { title: 'ASA Portfolio', category: 'Algorand', use: 'Review ALGO and Algorand asset holdings' },
   'onchain.algorandAsset': { title: 'Asset Intelligence', category: 'Algorand', use: 'Retrieve verified ASA metadata' },
@@ -57,8 +57,14 @@ export const ENDPOINT_DETAILS: Record<string, EndpointMeta> = {
 
 export const CATEGORY_ORDER = ['Market data', 'Intelligence', 'Agent tools', 'AI analyst', 'Algorand'] as const
 
+export const PRO_CATEGORIES = new Set(['Intelligence', 'Agent tools', 'AI analyst'])
+
 export function metaFor(operationId: string): EndpointMeta {
   return ENDPOINT_DETAILS[operationId] || { title: operationId, category: 'Other', use: '' }
+}
+
+export function isProEndpoint(operationId: string): boolean {
+  return PRO_CATEGORIES.has(metaFor(operationId).category)
 }
 
 export async function fetchCatalog(): Promise<CatalogEndpoint[]> {

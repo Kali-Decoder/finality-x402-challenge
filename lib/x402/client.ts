@@ -9,9 +9,14 @@ export const merchantUrl = '/api/x402'
 /** GoPlausible Mainnet CAIP-2 (full genesis hash). */
 const ALGORAND_MAINNET_CAIP2 = 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=' as const
 
+/** Must cover highest catalog price (ai.chat $4.00). @x402 default is $1. */
+const MAX_AMOUNT_PER_PAYMENT = '$5'
+
 export function createPaidFetch(signer: ClientAvmSigner, onState?: (state: PaymentState) => void) {
-  const client = new x402Client()
-  client.register(ALGORAND_MAINNET_CAIP2, new ExactAvmScheme(signer))
+  const client = x402Client.fromConfig({
+    schemes: [{ network: ALGORAND_MAINNET_CAIP2, client: new ExactAvmScheme(signer) }],
+    spendControls: { maxAmountPerPayment: MAX_AMOUNT_PER_PAYMENT },
+  })
   client.onBeforePaymentCreation(async () => {
     onState?.('signing')
   })
