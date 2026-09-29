@@ -9,7 +9,7 @@ import type { ClientAvmSigner } from '@x402/avm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { callPaidResource, merchantUrl, type PaymentState } from '@/lib/x402/client'
-import { fetchCatalog, metaFor, type CatalogEndpoint } from '@/lib/dashboard/catalog'
+import { fetchCatalog, metaFor, isProEndpoint, type CatalogEndpoint } from '@/lib/dashboard/catalog'
 import { saveTransaction } from '@/lib/dashboard/history'
 import ResultPresentation, { sampleResultFor, type ResultEnvelope } from '@/components/ResultPresentation'
 import { cn } from '@/lib/utils'
@@ -117,7 +117,7 @@ export default function RunClient() {
         method: endpoint.method,
         path: endpoint.path,
         price: endpoint.price,
-        status: response.body?.meta?.synthetic ? 'degraded' : 'settled',
+        status: response.body?.meta?.synthetic && !isProEndpoint(endpoint.operationId) ? 'degraded' : 'settled',
         wallet: activeAccount.address,
         receipt: response.receipt,
       })

@@ -26,6 +26,9 @@ const schema = z.object({
   OLLAMA_BASE_URL: z.string().url().default('http://localhost:11434'),
   OLLAMA_API_KEY: z.string().default(''), OLLAMA_MODEL: z.string().default('qwen3:8b'),
   GROQ_API_KEY: z.string().default(''), GROQ_MODEL: z.string().default(''),
+  /** Google AI Studio / Gemini API key (OpenAI-compatible endpoint). */
+  GEMINI_API_KEY: z.string().default(''),
+  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
 })
 
 export type Env = z.infer<typeof schema>

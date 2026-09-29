@@ -1,7 +1,7 @@
 export type OperationId = typeof endpoints[number]['operationId']
 export type Endpoint = typeof endpoints[number]
 
-/** Testnet USDC prices ($0.10–$0.90). Light routes low; heavy/LLM routes high. */
+/** Mainnet USDC prices. Market/on-chain $0.10–$0.45; Gemini pro routes $1.00–$4.00. */
 export const endpoints = [
   ['market.quotes','GET','/v1/market/quotes','$0.15','Bounded crypto spot quotes','durable'],
   ['market.assets','GET','/v1/market/assets','$0.15','Asset search and symbol normalization','durable'],
@@ -10,16 +10,16 @@ export const endpoints = [
   ['market.categories','GET','/v1/market/categories','$0.15','Coin categories by 24h market-cap change','durable'],
   ['market.tokenPrices','GET','/v1/market/token-prices','$0.20','ERC-20 / on-chain token USD prices','durable'],
   ['market.fearGreed','GET','/v1/market/fear-greed','$0.10','Crypto Fear and Greed index','durable'],
-  ['intelligence.signals','POST','/v1/signals','$0.45','Multi-market signals and summary','durable'],
-  ['intelligence.technicals','POST','/v1/technicals','$0.45','Technical indicators and regime','durable'],
-  ['intelligence.report','POST','/v1/analysis/report','$0.70','Combined intelligence report','durable'],
-  ['intelligence.volume','POST','/v1/analysis/volume','$0.25','Volume participation analysis','durable'],
-  ['intelligence.events','POST','/v1/analysis/events','$0.45','Market event intelligence','durable'],
-  ['intelligence.backtest','POST','/v1/backtest','$0.70','Bounded strategy backtest','durable'],
-  ['agent.decision','POST','/v1/agent/decision','$0.55','Deterministic risk-aware decision','durable'],
-  ['agent.briefing','POST','/v1/agent/briefing','$0.70','Machine-readable market briefing','durable'],
-  ['agent.strategyParse','POST','/v1/agent/strategy/parse','$0.55','Natural language strategy parser','durable'],
-  ['ai.chat','POST','/v1/ai/chat','$0.90','Data-grounded analyst response','quota-limited'],
+  ['intelligence.signals','POST','/v1/signals','$1.85','Multi-market signals and summary','quota-limited'],
+  ['intelligence.technicals','POST','/v1/technicals','$1.85','Technical indicators and regime','quota-limited'],
+  ['intelligence.report','POST','/v1/analysis/report','$3.10','Combined intelligence report','quota-limited'],
+  ['intelligence.volume','POST','/v1/analysis/volume','$1.00','Volume participation analysis','quota-limited'],
+  ['intelligence.events','POST','/v1/analysis/events','$1.85','Market event intelligence','quota-limited'],
+  ['intelligence.backtest','POST','/v1/backtest','$3.10','Bounded strategy backtest','quota-limited'],
+  ['agent.decision','POST','/v1/agent/decision','$2.40','Gemini risk-aware decision','quota-limited'],
+  ['agent.briefing','POST','/v1/agent/briefing','$3.10','Gemini market briefing','quota-limited'],
+  ['agent.strategyParse','POST','/v1/agent/strategy/parse','$2.40','Natural language strategy parser','quota-limited'],
+  ['ai.chat','POST','/v1/ai/chat','$4.00','Gemini data-grounded analyst response','quota-limited'],
   ['onchain.algorandAccount','POST','/v1/onchain/algorand/account','$0.25','Algorand account intelligence','durable'],
   ['onchain.algorandPortfolio','POST','/v1/onchain/algorand/portfolio','$0.35','Algorand ASA portfolio','durable'],
   ['onchain.algorandAsset','POST','/v1/onchain/algorand/asset','$0.20','Algorand asset intelligence','durable'],

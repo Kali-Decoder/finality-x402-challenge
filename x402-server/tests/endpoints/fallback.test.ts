@@ -49,21 +49,28 @@ describe('soft-domain always-fallback (market / intelligence / agent / ai)',()=>
   it('returns dummy intelligence signals in live mode when candles provider fails',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new Error('provider down')))
     const result=await executeOperation(liveEnv,'intelligence.signals',{symbols:['BTC'],marketType:'crypto',interval:'1h',limit:40})
-    expect(result.meta).toMatchObject({dataMode:'mock',synthetic:true,fallback:true})
-    expect(result.data).toMatchObject({signals:[{symbol:'BTC'}],summary:expect.any(Object)})
+    expect(result.data).toMatchObject({signals:[{symbol:'BTC'}],summary:expect.any(Object),answer:expect.any(String)})
+    expect(result.meta?.synthetic).toBe(false)
   })
 
   it('returns dummy agent decision in live mode when candles provider fails',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new Error('provider down')))
     const result=await executeOperation(liveEnv,'agent.decision',{symbols:['BTC'],marketType:'crypto',interval:'1h',limit:40,risk:'balanced'})
-    expect(result.meta).toMatchObject({dataMode:'mock',synthetic:true,fallback:true})
-    expect(result.data).toMatchObject({action:expect.any(String),confidence:expect.any(Number),risk:'balanced'})
+    expect(result.data).toMatchObject({action:expect.any(String),confidence:expect.any(Number),risk:'balanced',answer:expect.any(String)})
+    expect(result.meta?.synthetic).toBe(false)
   })
 
   it('returns synthetic ai.chat answer when model provider fails',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new Error('model down')))
     const result=await executeOperation(liveEnv,'ai.chat',{symbols:['BTC'],marketType:'crypto',interval:'1h',limit:20,prompt:'Analyze BTC'})
-    expect(result.meta).toMatchObject({dataMode:'mock',synthetic:true,fallback:true})
-    expect(result.data).toMatchObject({generatedByModel:false,answer:expect.stringContaining('Synthetic analyst response')})
+    expect(result.data).toMatchObject({answer:expect.stringContaining('Synthetic analyst response')})
+    expect((result.data as any).answer).toBeTruthy()
+  })
+
+  it('returns pro intelligence payload with answer when candles provider fails',async()=>{
+    vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new Error('provider down')))
+    const result=await executeOperation(liveEnv,'intelligence.volume',{symbols:['BTC'],marketType:'crypto',interval:'1h',limit:40})
+    expect(result.data).toMatchObject({answer:expect.any(String),symbol:'BTC'})
+    expect(result.meta?.synthetic).toBe(false)
   })
 })

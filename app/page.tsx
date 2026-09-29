@@ -1,333 +1,293 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Wallet, Zap, Bot, Database, ShieldCheck, CheckCircle2, Receipt } from 'lucide-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import DottedMap from '@/components/ui/dotted-map'
+import ProductFlowAnimation from '@/components/ProductFlowAnimation'
 import { GOPLAUSIBLE } from '@/lib/goplausible'
 
 const STEPS = [
-  { num: '01', title: 'Connect Wallet', desc: 'Link Pera, Defly, or Lute on Algorand Mainnet — no signup, no API key.' },
-  { num: '02', title: 'Pick an API', desc: 'Choose from 39 live endpoints: market data, intel, AI, agents, and Algorand on-chain.' },
-  { num: '03', title: 'Pay One Request', desc: 'Unpaid calls return HTTP 402. You sign the exact USDC price for that call only.' },
-  { num: '04', title: 'Get the Result', desc: 'Live JSON back immediately, with an on-chain settlement receipt from GoPlausible.' },
+  { num: '01', title: 'Connect wallet', desc: 'Pera, Defly, or Lute on Algorand Mainnet. No signup, no API key.' },
+  { num: '02', title: 'Pick an API', desc: 'Market data, intelligence, AI, agents, and Algorand on-chain routes.' },
+  { num: '03', title: 'Pay one request', desc: 'Unpaid calls return HTTP 402. Sign the exact USDC price for that call.' },
+  { num: '04', title: 'Get the result', desc: 'Live JSON back immediately, with an on-chain settlement receipt.' },
 ]
 
-const FEATURES = [
-  {
-    title: 'Market Data',
-    stat: '7',
-    unit: 'APIs',
-    desc: 'Quotes, candles, trending, categories, token prices, and fear & greed — priced per call.',
-    icon: Database,
-    className: 'md:col-span-2',
-  },
-  {
-    title: 'Intelligence',
-    stat: '6',
-    unit: 'APIs',
-    desc: 'Signals, technicals, reports, volume, events, and backtests without a monthly Pro seat.',
-    icon: Zap,
-    className: 'md:col-span-1',
-  },
-  {
-    title: 'AI & Agents',
-    stat: '4',
-    unit: 'APIs',
-    desc: 'Chat, decisions, briefings, and strategy parse — call model-grade tools one request at a time.',
-    icon: Bot,
-    className: 'md:col-span-1',
-  },
+const CATALOG = [
+  { name: 'Market data', count: '7', detail: 'Quotes, candles, trending, categories, token prices, fear & greed.' },
+  { name: 'Intelligence', count: '6', detail: 'Signals, technicals, reports, volume, events, and backtests on top of live feeds.' },
+  { name: 'AI & agents', count: '4', detail: 'Chat, decisions, briefings, and strategy parse: analysis your agent can call once.' },
+  { name: 'Algorand', count: '22', detail: 'Accounts, assets, apps, boxes, blocks, and mempool: chain data at your agent’s fingertips.' },
 ]
 
-const WHY = [
+const REASONS = [
   {
-    title: 'No monthly Pro plan',
-    desc: 'Skip SaaS subscriptions built for high-volume teams. Buy the call you need, when you need it.',
+    title: 'No paid data subscriptions',
+    desc: 'Skip monthly seats for chain data and pro market APIs. Your agent pays only for the call it makes.',
   },
   {
-    title: 'Single-request pricing',
-    desc: 'Every endpoint posts an exact USDC price. Pay that amount once — nothing rolls over, nothing locks in.',
+    title: 'Analysis on top of the data',
+    desc: 'Finality does not stop at raw reads. Intelligence, AI, and agent endpoints turn that data into usable signals.',
   },
   {
-    title: 'Built for people and agents',
-    desc: 'Humans use the dashboard. Agents hit the same HTTP APIs with x402. One rail for both.',
+    title: 'x402 for people and agents',
+    desc: 'Same HTTP catalog for a human in the dashboard or an autonomous agent. HTTP 402 → USDC → live result.',
   },
 ]
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-}
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-foreground selection:text-background">
-      <section className="relative min-h-[calc(100vh-5rem)] flex items-center pt-16 pb-20 px-6 border-b border-border">
-        <div className="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-16 items-center w-full">
-          <div className="space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-border bg-muted/30 mb-8 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                <Sparkles className="h-3 w-3" />
-                Pay-per-request APIs · x402 on Algorand
-              </div>
-              <h1 className="text-6xl md:text-8xl font-sans font-bold tracking-tighter leading-[0.9] mb-6">
-                NO MONTHLY
-                <br />
-                PLAN.
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-lg leading-relaxed">
-                Finality gives people and agents pro market, AI, and on-chain APIs as single paid requests — Mainnet
-                USDC via x402. No accounts. No API keys. No subscription.
-              </p>
-            </motion.div>
+    <div className="bg-background text-foreground">
+      {/* Hero: one composition, brand, headline, line, CTAs, full-bleed map */}
+      <section className="relative min-h-[calc(100svh-4.5rem)] flex items-end overflow-hidden border-b border-border">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_20%,oklch(0.92_0.02_220)_0%,transparent_55%),linear-gradient(180deg,oklch(0.98_0.005_220)_0%,var(--background)_70%)]"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.55]">
+          <DottedMap className="h-full w-full scale-110 origin-center" />
+        </div>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/20"
+        />
 
+        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-10 pt-20 pb-16 md:pb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-3xl"
+          >
+            <p className="font-mono text-xs uppercase tracking-[0.28em] text-muted-foreground mb-6">Finality</p>
+            <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9]">
+              Pay for the call.
+              <br />
+              Not the plan.
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-light">
+              Put Algorand data at your agent’s fingertips with x402. No paid subscriptions required. Finality adds
+              market intelligence and analysis on top of that data, priced per request in Mainnet USDC.
+            </p>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 pt-4"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.6 }}
+              className="mt-10 flex flex-col sm:flex-row gap-3"
             >
               <Link
                 href="/explore"
-                className="h-12 px-8 bg-foreground text-background font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                className="h-12 px-8 bg-foreground text-background font-medium inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
               >
-                CALL AN API
+                Open dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/explore/endpoints"
+                className="h-12 px-8 border border-border inline-flex items-center justify-center font-mono text-sm uppercase tracking-wider hover:bg-muted/40 transition-colors"
+              >
+                Browse endpoints
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Justification */}
+      <section className="py-20 md:py-28 px-6 md:px-10 border-b border-border">
+        <div className="max-w-[1400px] mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-20 items-start">
+          <div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.05]">
+              Chain data for your agent.
+              <br />
+              Analysis built in.
+            </h2>
+            <p className="mt-6 text-muted-foreground text-lg leading-relaxed max-w-xl">
+              Most teams buy expensive subscriptions just to read Algorand state or run market tools. Finality gives your
+              agent that data over x402. Pay only when it needs a call. Then it layers analysis on the same catalog so
+              endpoints return signals, reports, and decisions, not just raw JSON dumps.
+            </p>
+          </div>
+          <div className="space-y-6 border-l border-border pl-6 md:pl-8">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="block font-semibold text-foreground mb-1">Algorand at the edge</span>
+              Accounts, assets, apps, boxes, blocks, and mempool: live Mainnet reads your agent can request on demand.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="block font-semibold text-foreground mb-1">No subscription wall</span>
+              No API keys, no monthly Pro seat. x402 settles the exact USDC price for that single request.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="block font-semibold text-foreground mb-1">Analysis on the endpoints</span>
+              Intelligence and AI routes sit on top of the data layer so agents get usable analysis in one paid call.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <ProductFlowAnimation />
+
+      {/* Why */}
+      <section className="py-24 md:py-32 px-6 md:px-10 border-b border-border">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-2xl mb-14 md:mb-20">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Why Finality</h2>
+            <p className="mt-4 text-muted-foreground text-lg leading-relaxed">
+              Built so autonomous agents, and the people who run them, can reach Algorand data and pro analysis
+              without buying a subscription first.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-x-10 gap-y-12">
+            {REASONS.map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ delay: i * 0.08, duration: 0.45 }}
+                className="border-t border-foreground/20 pt-6"
+              >
+                <h3 className="text-lg font-bold mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Catalog */}
+      <section className="py-24 md:py-32 px-6 md:px-10 border-b border-border">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-16">
+            <div className="max-w-xl">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight">What you can call</h2>
+              <p className="mt-4 text-muted-foreground text-lg leading-relaxed">
+                Thirty-nine live endpoints. Each posts an exact USDC price and returns live JSON.
+              </p>
+            </div>
+            <Link
+              href="/explore/endpoints"
+              className="inline-flex items-center gap-2 text-sm font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+            >
+              View catalog
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <ul className="divide-y divide-border border-y border-border">
+            {CATALOG.map((item, i) => (
+              <motion.li
+                key={item.name}
+                initial={{ opacity: 0, x: -8 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+                className="grid grid-cols-[4rem_1fr] md:grid-cols-[5rem_12rem_1fr] gap-4 md:gap-8 py-6 md:py-8 items-baseline"
+              >
+                <span className="font-mono text-sm text-muted-foreground tabular-nums">{item.count}</span>
+                <span className="font-semibold text-lg">{item.name}</span>
+                <span className="col-span-2 md:col-span-1 text-sm text-muted-foreground leading-relaxed">
+                  {item.detail}
+                </span>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-24 md:py-32 px-6 md:px-10 border-b border-border">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-2xl mb-14 md:mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">How a request works</h2>
+            <p className="mt-4 text-muted-foreground text-lg leading-relaxed">
+              One wallet signature. One USDC payment. One API response. Repeat only when you need another call.
+            </p>
+          </div>
+
+          <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+            {STEPS.map((step, i) => (
+              <motion.li
+                key={step.num}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ delay: i * 0.1, duration: 0.45 }}
+                className="relative"
+              >
+                <span className="font-mono text-xs tracking-[0.2em] text-muted-foreground">{step.num}</span>
+                <h3 className="mt-3 text-xl font-bold">{step.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+                {i < STEPS.length - 1 && (
+                  <span
+                    aria-hidden
+                    className="hidden lg:block absolute top-2 -right-3 w-6 border-t border-border"
+                  />
+                )}
+              </motion.li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Rail strip */}
+      <section className="py-16 md:py-20 px-6 md:px-10 border-b border-border bg-muted/30">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
+          {[
+            ['Network', 'Algorand Mainnet'],
+            ['Asset', `USDC ${GOPLAUSIBLE.usdcAsaId}`],
+            ['Protocol', 'x402'],
+            ['Facilitator', 'GoPlausible'],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+              <div className="mt-2 text-sm md:text-base font-semibold">{value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Closing CTA */}
+      <section className="relative py-28 md:py-36 px-6 md:px-10 overflow-hidden bg-foreground text-background">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none hidden md:block">
+          <Image src="/finality.webp" alt="" width={420} height={420} className="w-[28rem] h-auto" />
+        </div>
+        <div className="relative max-w-[1400px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="max-w-2xl"
+          >
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter leading-[0.95]">
+              Skip the monthly seat.
+              <br />
+              Run the request.
+            </h2>
+            <p className="mt-6 text-lg text-background/65 max-w-lg font-light leading-relaxed">
+              Give your agent Algorand data and analysis over x402. Pay per call, skip the subscription.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/explore"
+                className="h-12 px-8 bg-background text-foreground font-medium inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              >
+                Open dashboard
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href={GOPLAUSIBLE.leaderboard}
+                href={GOPLAUSIBLE.merchant}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-12 px-8 border border-border flex items-center justify-center hover:bg-muted/50 transition-colors font-mono text-sm"
+                className="h-12 px-8 border border-background/30 inline-flex items-center justify-center font-mono text-sm uppercase tracking-wider hover:bg-background/10 transition-colors"
               >
-                VIEW_LEADERBOARD
+                Merchant page
               </a>
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 1 }}
-            className="relative min-h-[400px] flex items-center justify-center"
-          >
-            <div className="absolute -top-4 -left-4 w-24 h-24 border-t border-l border-foreground/20" />
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 border-b border-r border-foreground/20" />
-            <DottedMap className="w-full h-full opacity-80" />
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 border-b border-border">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="mb-12">
-            <h2 className="text-4xl md:text-6xl font-sans font-bold tracking-tight mb-4">Why Finality</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Most pro and special APIs force a monthly plan before you can ship. We meter access per request so you
-              only pay for what you actually call.
-            </p>
-            <div className="w-24 h-1 bg-foreground mt-4" />
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {WHY.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-8 border border-border bg-background"
-              >
-                <Receipt className="h-5 w-5 mb-6 text-foreground" />
-                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-32 px-6">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="mb-8">
-            <h2 className="text-4xl md:text-6xl font-sans font-bold tracking-tight mb-4">What you can call</h2>
-            <p className="text-lg text-muted-foreground max-w-xl">
-              Thirty-nine live endpoints. Market, intelligence, AI/agent tools, plus 22 Algorand on-chain routes —
-              each with a posted USDC price.
-            </p>
-            <div className="w-24 h-1 bg-foreground mt-4" />
-          </div>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[200px]"
-          >
-            {FEATURES.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={itemVariants}
-                whileHover={{ y: -5 }}
-                className={`group relative p-6 border border-border bg-background hover:bg-muted/5 transition-all duration-300 flex flex-col justify-between ${feature.className}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="inline-flex p-3 border border-border text-foreground group-hover:bg-foreground group-hover:text-background transition-all duration-300">
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold tracking-tighter">{feature.stat}</span>
-                    <span className="text-xs font-mono text-muted-foreground uppercase">{feature.unit}</span>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold mb-1">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-snug text-sm">{feature.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-            <motion.div
-              variants={itemVariants}
-              whileHover={{ y: -5 }}
-              className="group relative p-6 border border-border bg-background hover:bg-muted/5 transition-all duration-300 flex flex-col justify-between md:col-span-2"
-            >
-              <div className="flex justify-between items-start">
-                <div className="inline-flex p-3 border border-border w-fit group-hover:bg-foreground group-hover:text-background transition-all">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold tracking-tighter">22</span>
-                  <span className="text-xs font-mono text-muted-foreground uppercase">On-chain</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold mb-1">Algorand On-chain</h3>
-                <p className="text-muted-foreground text-sm leading-snug">
-                  Indexer and algod routes for accounts, assets, apps, boxes, blocks, and mempool — settled by
-                  GoPlausible on Mainnet. Keys never leave the wallet.
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-32 px-6 border-t border-border">
-        <div className="max-w-[1400px] mx-auto w-full">
-          <div className="mb-16">
-            <h2 className="text-4xl md:text-6xl font-sans font-bold tracking-tight mb-4">How a single request works</h2>
-            <p className="text-lg text-muted-foreground max-w-xl">
-              One wallet signature. One USDC payment. One API response. Repeat only when you need another call.
-            </p>
-            <div className="w-24 h-1 bg-foreground mt-4" />
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STEPS.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                whileHover={{ y: -5 }}
-                className="group relative p-8 border border-border bg-background hover:bg-muted/5 transition-all duration-300 flex flex-col justify-between min-h-[240px]"
-              >
-                <span className="text-5xl font-bold tracking-tighter text-foreground/10 group-hover:text-foreground/20 transition-colors">
-                  {step.num}
-                </span>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground mb-3">{step.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-32 px-6 border-t border-border">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">For builders and autonomous agents</h2>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                If you need working APIs but not a monthly seat — Finality is the metering layer. Same catalog for a
-                person in the dashboard or an agent following OpenAPI.
-              </p>
-              <div className="space-y-4">
-                {[
-                  'No signup wall — connect a wallet and pay the posted price',
-                  'Discover operation IDs and USDC prices from /v1/catalog',
-                  'HTTP 402 → signed Payment-Signature → live pro/special API result',
-                  'On-chain receipts from GoPlausible on Algorand Mainnet',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3 p-4 border border-border bg-muted/20">
-                    <CheckCircle2 className="h-5 w-5 text-foreground flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-muted-foreground">{item}</p>
-                  </div>
-                ))}
-              </div>
             </div>
-            <div className="border border-border p-8 bg-muted/10">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Payment rail
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  ['Network', 'Algorand Mainnet'],
-                  ['Asset', `USDC ${GOPLAUSIBLE.usdcAsaId}`],
-                  ['Protocol', 'x402'],
-                  ['Facilitator', 'GoPlausible'],
-                  ['Billing', 'Per request'],
-                  ['Catalog', '39 endpoints'],
-                ].map(([k, v]) => (
-                  <div key={k} className="p-3 border border-border bg-background">
-                    <div className="text-[10px] font-mono uppercase text-muted-foreground">{k}</div>
-                    <div className="text-sm font-medium mt-1">{v}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="pt-6 mt-6 border-t border-border">
-                <Link href="/explore" className="text-sm font-mono underline underline-offset-4 hover:opacity-70">
-                  OPEN_API_DASHBOARD
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-32 px-6 border-t border-border bg-foreground text-background">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6">PAY FOR THE CALL.</h2>
-          <p className="text-lg md:text-xl text-background/70 mb-16 max-w-2xl mx-auto font-light">
-            Skip the monthly Pro plan. Run the request you need — market, AI, or on-chain — and settle in USDC.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link
-              href="/explore"
-              className="inline-flex items-center gap-2 text-xl font-medium border-b-2 border-background hover:opacity-70 transition-opacity"
-            >
-              Open Dashboard <ArrowRight className="w-5 h-5" />
-            </Link>
-            <a
-              href={GOPLAUSIBLE.merchant}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xl font-medium border-b-2 border-background hover:opacity-70 transition-opacity"
-            >
-              Merchant Page <Zap className="w-5 h-5" />
-            </a>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

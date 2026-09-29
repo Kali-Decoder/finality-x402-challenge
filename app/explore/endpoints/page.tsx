@@ -6,11 +6,17 @@ import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { fetchCatalog, metaFor, CATEGORY_ORDER, type CatalogEndpoint } from '@/lib/dashboard/catalog'
+import { cn } from '@/lib/utils'
+import { fetchCatalog, metaFor, isProEndpoint, CATEGORY_ORDER, type CatalogEndpoint } from '@/lib/dashboard/catalog'
+
+type CategoryFilter = 'All' | (typeof CATEGORY_ORDER)[number]
+
+const CATEGORY_TABS: CategoryFilter[] = ['All', ...CATEGORY_ORDER]
 
 export default function EndpointsPage() {
   const [catalog, setCatalog] = useState<CatalogEndpoint[]>([])
   const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<CategoryFilter>('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -31,14 +37,24 @@ export default function EndpointsPage() {
     }
   }, [])
 
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const item of catalog) {
+      const cat = metaFor(item.operationId).category
+      counts.set(cat, (counts.get(cat) || 0) + 1)
+    }
+    return counts
+  }, [catalog])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return catalog
     return catalog.filter((item) => {
       const m = metaFor(item.operationId)
-      return `${m.title} ${m.category} ${item.operationId} ${item.path} ${item.description}`.toLowerCase().includes(q)
+      if (category !== 'All' && m.category !== category) return false
+      if (!q) return true
+      return `${m.title} ${m.category} ${item.operationId} ${item.path} ${item.description}${isProEndpoint(item.operationId) ? ' pro-endpoints' : ''}`.toLowerCase().includes(q)
     })
-  }, [catalog, query])
+  }, [catalog, query, category])
 
   return (
     <div className="space-y-8">
@@ -55,14 +71,47 @@ export default function EndpointsPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filter endpoints."
-          className="pl-9 h-10 rounded-none"
-        />
+      <div className="space-y-4">
+        <div
+          role="tablist"
+          aria-label="Endpoint categories"
+          className="flex items-center gap-1 overflow-x-auto border-b border-border -mb-px"
+        >
+          {CATEGORY_TABS.map((tab) => {
+            const active = category === tab
+            const count = tab === 'All' ? catalog.length : categoryCounts.get(tab) || 0
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setCategory(tab)}
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-2.5 text-[10px] uppercase tracking-[0.14em] border-b-2 -mb-px transition-colors whitespace-nowrap',
+                  active
+                    ? 'border-foreground text-foreground font-semibold'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <span>{tab}</span>
+                <span className={cn('tabular-nums', active ? 'text-foreground' : 'text-muted-foreground/70')}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filter endpoints."
+            className="pl-9 h-10 rounded-none"
+          />
+        </div>
       </div>
 
       {error && <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{error}</div>}
@@ -96,10 +145,18 @@ export default function EndpointsPage() {
             ) : (
               filtered.map((item) => {
                 const m = metaFor(item.operationId)
+                const pro = isProEndpoint(item.operationId)
                 return (
                   <tr key={item.operationId} className="border-b border-border last:border-0 hover:bg-muted/20">
                     <td className="px-4 py-3">
-                      <div className="font-semibold">{m.title}</div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold">{m.title}</span>
+                        {pro && (
+                          <Badge className="rounded-none font-mono text-[10px] uppercase bg-sky-500/15 text-sky-700 dark:text-sky-400 hover:bg-sky-500/15 border-0">
+                            pro-endpoints
+                          </Badge>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground mt-0.5 mono">{item.operationId}</div>
                     </td>
                     <td className="px-4 py-3">
@@ -108,7 +165,16 @@ export default function EndpointsPage() {
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-xs">
-                      <span className="font-semibold">{item.method}</span>
+                      <span
+                        className={cn(
+                          'inline-block px-1.5 py-0.5 font-semibold tracking-wider',
+                          item.method === 'GET'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+                        )}
+                      >
+                        {item.method}
+                      </span>
                       <div className="text-muted-foreground mt-0.5 truncate max-w-[160px]">{item.path}</div>
                     </td>
                     <td className="px-4 py-3 font-semibold">${item.price}</td>
@@ -127,14 +193,6 @@ export default function EndpointsPage() {
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-        {CATEGORY_ORDER.map((cat) => (
-          <span key={cat} className="border border-border px-2 py-1">
-            {cat}
-          </span>
-        ))}
       </div>
     </div>
   )

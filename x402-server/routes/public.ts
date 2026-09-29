@@ -105,7 +105,7 @@ export function registerPublicRoutes(app: Hono, env: Env) {
   app.get('/llms.txt', c => c.text(llmsTxt(origin), 200, { 'content-type': 'text/plain; charset=utf-8' }))
   app.get('/agents.md', c => c.text(agentsMd(origin), 200, { 'content-type': 'text/markdown; charset=utf-8' }))
 
-  app.get('/health', c => c.json({ status:'ok', service: PLATFORM.name, version:'1.0.0', uptimeSeconds:process.uptime(), merchantId: PLATFORM.merchantId, components:{ x402:{status:payTo?'configured':'misconfigured',facilitator:'GoPlausible'}, marketProviders:{status:'configured',mode:env.DATA_MODE}, indexer:{status:'configured'}, ai:{status:env.GROQ_API_KEY||env.OLLAMA_BASE_URL?'configured':'disabled'} } }))
+  app.get('/health', c => c.json({ status:'ok', service: PLATFORM.name, version:'1.0.0', uptimeSeconds:process.uptime(), merchantId: PLATFORM.merchantId, components:{ x402:{status:payTo?'configured':'misconfigured',facilitator:'GoPlausible'}, marketProviders:{status:'configured',mode:env.DATA_MODE}, indexer:{status:'configured'}, ai:{status:env.GEMINI_API_KEY||env.GROQ_API_KEY||env.OLLAMA_BASE_URL?'configured':'disabled',provider:env.LLM_PROVIDER} } }))
   app.get('/info', c => c.json({
     service: PLATFORM.name,
     version: '1.0.0',
