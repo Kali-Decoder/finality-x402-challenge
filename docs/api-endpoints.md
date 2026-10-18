@@ -13,7 +13,7 @@ The merchant API is available to both autonomous agents and browser users. Produ
 
 ## Paid endpoints
 
-All prices are denominated in Algorand Testnet USDC (ASA `10458941`). An unsigned request returns HTTP `402` with x402 payment requirements. A client signs those requirements and retries with `PAYMENT-SIGNATURE`; a successful response includes `PAYMENT-RESPONSE`.
+All prices are denominated in Algorand Mainnet USDC (ASA `31566704`). Pro-endpoints (Intelligence, Agent tools, AI analyst) are Gemini-backed at $1.00–$4.00. An unsigned request returns HTTP `402` with x402 payment requirements. A client signs those requirements and retries with `PAYMENT-SIGNATURE`; a successful response includes `PAYMENT-RESPONSE`.
 
 | Operation ID | Method | Path | Price (USDC) | Purpose |
 |---|---|---|---:|---|
@@ -24,16 +24,16 @@ All prices are denominated in Algorand Testnet USDC (ASA `10458941`). An unsigne
 | `market.categories` | GET | `/v1/market/categories` | $0.15 | Coin categories by 24h market-cap change |
 | `market.tokenPrices` | GET | `/v1/market/token-prices` | $0.20 | ERC-20 / on-chain token USD prices |
 | `market.fearGreed` | GET | `/v1/market/fear-greed?limit=1` | $0.10 | Fear and Greed index |
-| `intelligence.signals` | POST | `/v1/signals` | $0.45 | Multi-market signals |
-| `intelligence.technicals` | POST | `/v1/technicals` | $0.45 | Indicators and regime |
-| `intelligence.report` | POST | `/v1/analysis/report` | $0.70 | Combined intelligence report |
-| `intelligence.volume` | POST | `/v1/analysis/volume` | $0.25 | Volume participation analysis |
-| `intelligence.events` | POST | `/v1/analysis/events` | $0.45 | Market event intelligence |
-| `intelligence.backtest` | POST | `/v1/backtest` | $0.70 | Bounded strategy backtest |
-| `agent.decision` | POST | `/v1/agent/decision` | $0.55 | Risk-aware decision |
-| `agent.briefing` | POST | `/v1/agent/briefing` | $0.70 | Machine-readable briefing |
-| `agent.strategyParse` | POST | `/v1/agent/strategy/parse` | $0.55 | Natural-language strategy parser |
-| `ai.chat` | POST | `/v1/ai/chat` | $0.90 | Data-grounded analyst response |
+| `intelligence.signals` | POST | `/v1/signals` | $1.85 | Multi-market signals (Gemini) |
+| `intelligence.technicals` | POST | `/v1/technicals` | $1.85 | Indicators and regime (Gemini) |
+| `intelligence.report` | POST | `/v1/analysis/report` | $3.10 | Combined intelligence report (Gemini) |
+| `intelligence.volume` | POST | `/v1/analysis/volume` | $1.00 | Volume participation analysis (Gemini) |
+| `intelligence.events` | POST | `/v1/analysis/events` | $1.85 | Market event intelligence (Gemini) |
+| `intelligence.backtest` | POST | `/v1/backtest` | $3.10 | Bounded strategy backtest (Gemini) |
+| `agent.decision` | POST | `/v1/agent/decision` | $2.40 | Risk-aware decision (Gemini) |
+| `agent.briefing` | POST | `/v1/agent/briefing` | $3.10 | Machine-readable briefing (Gemini) |
+| `agent.strategyParse` | POST | `/v1/agent/strategy/parse` | $2.40 | Natural-language strategy parser (Gemini) |
+| `ai.chat` | POST | `/v1/ai/chat` | $4.00 | Gemini data-grounded analyst response |
 | `onchain.algorandAccount` | POST | `/v1/onchain/algorand/account` | $0.25 | Algorand account intelligence (Indexer) |
 | `onchain.algorandPortfolio` | POST | `/v1/onchain/algorand/portfolio` | $0.35 | ASA portfolio (Indexer) |
 | `onchain.algorandAsset` | POST | `/v1/onchain/algorand/asset` | $0.20 | ASA metadata/intelligence (Indexer) |

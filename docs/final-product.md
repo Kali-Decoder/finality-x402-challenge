@@ -71,16 +71,16 @@ npm run test:x402:testnet
 | `POST /v1/market/candles` | $0.25 | Binance klines | Bounded OHLCV candle history |
 | `GET /v1/market/trending` | $0.20 | Binance quotes, ranked by volume | Ranked liquid-asset snapshot |
 | `GET /v1/market/fear-greed` | $0.10 | Alternative.me | Sentiment value, classification and timestamp |
-| `POST /v1/signals` | $0.45 | Deterministic analysis of live candles | BUY/SELL/HOLD, score, price and regime |
-| `POST /v1/technicals` | $0.45 | Deterministic analysis of live candles | SMA10, SMA30, RSI14, momentum and regime |
-| `POST /v1/analysis/report` | $0.70 | Deterministic combined analysis | Technical snapshot, signal and risk state |
-| `POST /v1/analysis/volume` | $0.25 | Live candle volume calculation | Current/average volume, ratio and spike flag |
-| `POST /v1/analysis/events` | $0.45 | Live OHLCV movement detection | Price events crossing the bounded threshold |
-| `POST /v1/backtest` | $0.70 | Historical candles + MA simulation | Final equity, return and trade count |
-| `POST /v1/agent/decision` | $0.55 | Deterministic technical/risk rules | Action, confidence, risk and max position size |
-| `POST /v1/agent/briefing` | $0.70 | Deterministic market summarization | Compact bias, regime, score and risks |
-| `POST /v1/agent/strategy/parse` | $0.55 | Bounded deterministic parser | Validated moving-average rules from plain text |
-| `POST /v1/ai/chat` | $0.90 | Groq; Ollama fallback | Concise model-generated analyst response |
+| `POST /v1/signals` | $1.85 | Live candles + Gemini narrative | BUY/SELL/HOLD, score, price, regime, answer |
+| `POST /v1/technicals` | $1.85 | Live candles + Gemini narrative | SMA10, SMA30, RSI14, momentum, regime, answer |
+| `POST /v1/analysis/report` | $3.10 | Combined analysis + Gemini | Technical snapshot, signal, risk, answer |
+| `POST /v1/analysis/volume` | $1.00 | Volume calc + Gemini | Current/average volume, ratio, spike, answer |
+| `POST /v1/analysis/events` | $1.85 | OHLCV events + Gemini | Price events + narrative answer |
+| `POST /v1/backtest` | $3.10 | MA simulation + Gemini | Final equity, return, trades, answer |
+| `POST /v1/agent/decision` | $2.40 | Risk rules + Gemini rationale | Action, confidence, risk, max position, answer |
+| `POST /v1/agent/briefing` | $3.10 | Market summary + Gemini | Bias, regime, score, risks, answer |
+| `POST /v1/agent/strategy/parse` | $2.40 | Gemini parse; deterministic fallback | Validated MA rules from plain text |
+| `POST /v1/ai/chat` | $4.00 | Gemini; Groq/Ollama fallback | Concise model-generated analyst response |
 | `POST /v1/onchain/algorand/account` | $0.25 | Nodely Testnet Indexer | Full account state |
 | `POST /v1/onchain/algorand/portfolio` | $0.35 | Nodely Testnet Indexer | ALGO balance, ASA holdings and round |
 | `POST /v1/onchain/algorand/asset` | $0.20 | Nodely Testnet Indexer | Verified ASA metadata |
@@ -140,15 +140,17 @@ The configured resilient profile is:
 ```env
 DATA_MODE=auto
 ALLOW_MOCK_FALLBACK=true
-LLM_PROVIDER=groq
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.0-flash
 ```
 
 Fallback order:
 
 | Failure | Behavior |
 |---|---|
-| Groq quota, rate limit, credentials, timeout or outage | Try local Ollama |
-| Groq and Ollama unavailable | Return deterministic AI fallback with `generatedByModel:false` |
+| Gemini quota, rate limit, credentials, timeout or outage | Try Groq (if configured), then local Ollama |
+| All LLM providers unavailable | Return deterministic structured fields with `generatedByModel:false` (and synthetic chat for `ai.chat`) |
 | Binance unavailable or rate-limited | Return deterministic schema-valid market fixture |
 | Alternative.me unavailable | Return deterministic sentiment fixture |
 | Nodely algod/Indexer unavailable | Return deterministic schema-valid on-chain fixture |
